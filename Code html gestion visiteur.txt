@@ -1,0 +1,811 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestion des Visiteurs</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .login-container h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 30px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: none;
+        }
+
+        .container.active {
+            display: block;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 25px 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .logout-btn {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .logout-btn:hover {
+            background: #ff3838;
+            transform: translateY(-2px);
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transition: all 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        .card h2 {
+            color: #2d3436;
+            margin-bottom: 20px;
+            font-size: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .icon-visiteur { background: #55efc4; }
+        .icon-user { background: #74b9ff; }
+        .icon-obs { background: #ffeaa7; }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #2d3436;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #dfe6e9;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            width: 100%;
+            transition: all 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .table-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #dfe6e9;
+        }
+
+        th {
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tbody tr {
+            transition: all 0.3s;
+        }
+
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-externe { background: #74b9ff; color: #0984e3; }
+        .badge-interne { background: #55efc4; color: #00b894; }
+        .badge-fournisseur { background: #ffeaa7; color: #fdcb6e; }
+
+        .action-btns {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-edit, .btn-delete {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .btn-edit {
+            background: #74b9ff;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #ff7675;
+            color: white;
+        }
+
+        .btn-edit:hover {
+            background: #0984e3;
+        }
+
+        .btn-delete:hover {
+            background: #d63031;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 36px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: #636e72;
+            font-size: 14px;
+            margin-top: 5px;
+            font-weight: 600;
+        }
+
+        .search-bar {
+            margin-bottom: 20px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #dfe6e9;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Screen -->
+    <div class="login-container" id="loginScreen">
+        <h1>🔐 Connexion</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <label>Nom d'utilisateur</label>
+                <input type="text" id="login_username" required>
+            </div>
+            <div class="form-group">
+                <label>Mot de passe</label>
+                <input type="password" id="login_password" required>
+            </div>
+            <button type="submit" class="btn">Se connecter</button>
+        </form>
+    </div>
+
+    <!-- Main Application -->
+    <div class="container" id="mainApp">
+        <!-- Header -->
+        <div class="header">
+            <h1>🏢 Système de Gestion des Visiteurs</h1>
+            <div class="user-info">
+                <div class="user-badge">👤 <span id="currentUser"></span> (<span id="currentRole"></span>)</div>
+                <button class="logout-btn" onclick="logout()">Déconnexion</button>
+            </div>
+        </div>
+
+        <!-- Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalVisiteurs">0</div>
+                <div class="stat-label">Total Visiteurs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="visiteursToday">0</div>
+                <div class="stat-label">Aujourd'hui</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalUsers">0</div>
+                <div class="stat-label">Utilisateurs</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalObs">0</div>
+                <div class="stat-label">Observations</div>
+            </div>
+        </div>
+
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Add Visitor Form -->
+            <div class="card">
+                <h2><span class="icon icon-visiteur">👥</span> Nouveau Visiteur</h2>
+                <form id="visiteurForm">
+                    <div class="form-group">
+                        <label>Nom</label>
+                        <input type="text" id="nom" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Prénom</label>
+                        <input type="text" id="prenom" required>
+                    </div>
+                    <div class="form-group">
+                        <label>CIN</label>
+                        <input type="text" id="cin" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Type Visiteur</label>
+                        <select id="type_visiteur" required>
+                            <option value="">Sélectionner...</option>
+                            <option value="Externe">Externe</option>
+                            <option value="Interne">Interne</option>
+                            <option value="Fournisseur">Fournisseur</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>But de la visite</label>
+                        <textarea id="but_visite" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn">➕ Ajouter Visiteur</button>
+                </form>
+            </div>
+
+            
+
+            <!-- Add Observation Form -->
+            <div class="card">
+                <h2><span class="icon icon-obs">📝</span> Nouvelle Observation</h2>
+                <form id="obsForm">
+                    <div class="form-group">
+                        <label>Utilisateur</label>
+                        <select id="obs_user" required></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea id="description" rows="6" required></textarea>
+                    </div>
+                    <button type="submit" class="btn">➕ Ajouter Observation</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Visitors Table -->
+        <div class="table-container">
+            <h2 style="margin-bottom: 20px; color: #2d3436;">📋 Liste des Visiteurs</h2>
+            <div class="search-bar">
+                <input type="text" id="searchVisiteur" placeholder="🔍 Rechercher un visiteur...">
+            </div>
+            <div id="visiteursLoading" class="loading" style="display:none;">Chargement...</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom Complet</th>
+                        <th>CIN</th>
+                        <th>Type</th>
+                        <th>But de la visite</th>
+                        <th>Date Visite</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="visiteursTable"></tbody>
+            </table>
+        </div>
+
+       
+
+        <!-- Observations Table -->
+        <div class="table-container" style="margin-top: 30px;">
+            <h2 style="margin-bottom: 20px; color: #2d3436;">📝 Observations</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Utilisateur</th>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="obsTable"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // Configuration de l'API
+        const API_URL = 'http://localhost/gestion_visiteurs/api.php';
+        let currentUserId = null;
+
+        // Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const username = document.getElementById('login_username').value;
+            const password = document.getElementById('login_password').value;
+            
+            try {
+                const response = await fetch(`${API_URL}?request=login`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({username, password})
+                });
+                
+                const data = await response.json();
+                
+                if(data.user) {
+                    currentUserId = data.user.id;
+                    document.getElementById('currentUser').textContent = data.user.username;
+                    document.getElementById('currentRole').textContent = data.user.role;
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('mainApp').classList.add('active');
+                    loadAllData();
+                } else {
+                    alert(data.message);
+                }
+            } catch(error) {
+                alert('Erreur de connexion: ' + error);
+            }
+        });
+
+        // Logout
+        function logout() {
+            if(confirm('Voulez-vous vraiment vous déconnecter?')) {
+                document.getElementById('loginScreen').style.display = 'block';
+                document.getElementById('mainApp').classList.remove('active');
+                document.getElementById('loginForm').reset();
+            }
+        }
+
+        // Load all data
+        async function loadAllData() {
+            await loadVisiteurs();
+            await loadUsers();
+            await loadObservations();
+            await loadStats();
+            await populateUserSelect();
+        }
+
+        // Load Visiteurs
+        async function loadVisiteurs() {
+            try {
+                const response = await fetch(`${API_URL}?request=visiteurs`);
+                const visiteurs = await response.json();
+                
+                const tbody = document.getElementById('visiteursTable');
+                tbody.innerHTML = visiteurs.map(v => `
+                    <tr>
+                        <td>${v.id_visiteur}</td>
+                        <td>${v.nom} ${v.prenom}</td>
+                        <td>${v.CIN}</td>
+                        <td><span class="badge badge-${v.type_visiteur.toLowerCase()}">${v.type_visiteur}</span></td>
+                        <td>${v.but_visite}</td>
+                        <td>${new Date(v.date_visite).toLocaleString('fr-FR')}</td>
+                        <td class="action-btns">
+                            <button class="btn-delete" onclick="deleteVisiteur(${v.id_visiteur})">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(error) {
+                console.error('Erreur:', error);
+            }
+        }
+
+        // Load Users
+        async function loadUsers() {
+            try {
+                const response = await fetch(`${API_URL}?request=users`);
+                const users = await response.json();
+                
+                const tbody = document.getElementById('usersTable');
+                tbody.innerHTML = users.map(u => `
+                    <tr>
+                        <td>${u.id_user}</td>
+                        <td>${u.username}</td>
+                        <td>${u.role}</td>
+                        <td>${u.heure_debut} - ${u.heure_fin}</td>
+                        <td class="action-btns">
+                            <button class="btn-delete" onclick="deleteUser(${u.id_user})">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(error) {
+                console.error('Erreur:', error);
+            }
+        }
+
+        // Load Observations
+        async function loadObservations() {
+            try {
+                const response = await fetch(`${API_URL}?request=observations`);
+                const observations = await response.json();
+                
+                const tbody = document.getElementById('obsTable');
+                tbody.innerHTML = observations.map(o => `
+                    <tr>
+                        <td>${o.id_obs}</td>
+                        <td>${o.username}</td>
+                        <td>${new Date(o.date_obs).toLocaleString('fr-FR')}</td>
+                        <td>${o.description}</td>
+                        <td class="action-btns">
+                            <button class="btn-delete" onclick="deleteObs(${o.id_obs})">🗑️</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch(error) {
+                console.error('Erreur:', error);
+            }
+        }
+
+        // Load Stats
+        async function loadStats() {
+            try {
+                const response = await fetch(`${API_URL}?request=stats`);
+                const stats = await response.json();
+                
+                document.getElementById('totalVisiteurs').textContent = stats.total_visiteurs;
+                document.getElementById('visiteursToday').textContent = stats.visiteurs_today;
+                document.getElementById('totalUsers').textContent = stats.total_users;
+                document.getElementById('totalObs').textContent = stats.total_obs;
+            } catch(error) {
+                console.error('Erreur:', error);
+            }
+        }
+
+        // Populate User Select
+        async function populateUserSelect() {
+            try {
+                const response = await fetch(`${API_URL}?request=users`);
+                const users = await response.json();
+                
+                const select = document.getElementById('obs_user');
+                select.innerHTML = '<option value="">Sélectionner...</option>' + 
+                    users.map(u => `<option value="${u.id_user}">${u.username}</option>`).join('');
+            } catch(error) {
+                console.error('Erreur:', error);
+            }
+        }
+
+        // Add Visiteur
+        document.getElementById('visiteurForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                nom: document.getElementById('nom').value,
+                prenom: document.getElementById('prenom').value,
+                cin: document.getElementById('cin').value,
+                type_visiteur: document.getElementById('type_visiteur').value,
+                but_visite: document.getElementById('but_visite').value,
+                id_user: currentUserId
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}?request=visiteurs`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                alert(result.message);
+                e.target.reset();
+                loadVisiteurs();
+                loadStats();
+            } catch(error) {
+                alert('Erreur: ' + error);
+            }
+        });
+
+        // Add User
+        document.getElementById('userForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                username: document.getElementById('username').value,
+                password: document.getElementById('password').value,
+                role: document.getElementById('role').value,
+                heure_debut: document.getElementById('heure_debut').value,
+                heure_fin: document.getElementById('heure_fin').value
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}?request=users`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                alert(result.message);
+                e.target.reset();
+                loadUsers();
+                populateUserSelect();
+                loadStats();
+            } catch(error) {
+                alert('Erreur: ' + error);
+            }
+        });
+
+        // Add Observation
+        document.getElementById('obsForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const data = {
+                id_user: document.getElementById('obs_user').value,
+                description: document.getElementById('description').value
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}?request=observations`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                alert(result.message);
+                e.target.reset();
+                loadObservations();
+                loadStats();
+            } catch(error) {
+                alert('Erreur: ' + error);
+            }
+        });
+
+        // Delete Visiteur
+        async function deleteVisiteur(id) {
+            if(confirm('Êtes-vous sûr de vouloir supprimer ce visiteur?')) {
+                try {
+                    const response = await fetch(`${API_URL}?request=visiteur&id=${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const result = await response.json();
+                    alert(result.message);
+                    loadVisiteurs();
+                    loadStats();
+                } catch(error) {
+                    alert('Erreur: ' + error);
+                }
+            }
+        }
+
+        // Delete User
+        async function deleteUser(id) {
+            if(confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur?')) {
+                try {
+                    const response = await fetch(`${API_URL}?request=user&id=${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const result = await response.json();
+                    alert(result.message);
+                    loadUsers();
+                    populateUserSelect();
+                    loadStats();
+                } catch(error) {
+                    alert('Erreur: ' + error);
+                }
+            }
+        }
+
+        // Delete Observation
+        async function deleteObs(id) {
+            if(confirm('Êtes-vous sûr de vouloir supprimer cette observation?')) {
+                try {
+                    const response = await fetch(`${API_URL}?request=observation&id=${id}`, {
+                        method: 'DELETE'
+                    });
+                    
+                    const result = await response.json();
+                    alert(result.message);
+                    loadObservations();
+                    loadStats();
+                } catch(error) {
+                    alert('Erreur: ' + error);
+                }
+            }
+        }
+
+        // Search functionality
+        document.getElementById('searchVisiteur').addEventListener('input', async (e) => {
+            const search = e.target.value.toLowerCase();
+            const response = await fetch(`${API_URL}?request=visiteurs`);
+            const visiteurs = await response.json();
+            
+            const filtered = visiteurs.filter(v => 
+                v.nom.toLowerCase().includes(search) ||
+                v.prenom.toLowerCase().includes(search) ||
+                v.CIN.toLowerCase().includes(search)
+            );
+            
+            const tbody = document.getElementById('visiteursTable');
+            tbody.innerHTML = filtered.map(v => `
+                <tr>
+                    <td>${v.id_visiteur}</td>
+                    <td>${v.nom} ${v.prenom}</td>
+                    <td>${v.CIN}</td>
+                    <td><span class="badge badge-${v.type_visiteur.toLowerCase()}">${v.type_visiteur}</span></td>
+                    <td>${v.but_visite}</td>
+                    <td>${new Date(v.date_visite).toLocaleString('fr-FR')}</td>
+                    <td class="action-btns">
+                        <button class="btn-delete" onclick="deleteVisiteur(${v.id_visiteur})">🗑️</button>
+                    </td>
+                </tr>
+            `).join('');
+        });
+    </script>
+</body>
+</html>
